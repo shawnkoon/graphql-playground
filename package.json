@@ -1,0 +1,31 @@
+{
+  "name": "graphql-playground",
+  "version": "1.0.0",
+  "description": "GraphQL playground using JavaScript.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --build tsconfig.json",
+    "start": "nodemon --watch 'src/**/**.ts' --exec 'ts-node' src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shawnkoon/graphql-playground.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shawnkoon/graphql-playground/issues"
+  },
+  "homepage": "https://github.com/shawnkoon/graphql-playground#readme",
+  "dependencies": {
+    "graphql-yoga": "^1.17.4"
+  },
+  "devDependencies": {
+    "@types/node": "^11.10.5",
+    "nodemon": "^1.18.10",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.3333"
+  }
+}
