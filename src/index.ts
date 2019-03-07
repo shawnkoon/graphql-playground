@@ -1,4 +1,5 @@
 import { GraphQLServer } from 'graphql-yoga';
+import uuid from 'uuid/v4';
 
 // Scalar Types - String, Boolean, Int, Float, ID
 
@@ -64,6 +65,31 @@ const typeDefs = `
     comments: [Comment!]!
   }
 
+  type Mutation {
+    createUser(data: CreateUserInput!): User!
+    createPost(data: CreatePostInput!): Post!
+    createComment(data: CreateCommentInput!): Comment!
+  }
+
+  input CreateUserInput {
+    name: String!
+    email: String!
+    age: Int
+  }
+
+  input CreatePostInput {
+    title: String!
+    body: String!
+    published: Boolean!
+    author: ID!
+  }
+
+  input CreateCommentInput {
+    text: String!
+    author: ID!
+    post: ID!
+  }
+
   type Comment {
     id: ID!
     text: String!
@@ -119,6 +145,64 @@ const resolvers = {
     },
     post: () => {
       return posts[0];
+    }
+  },
+  Mutation: {
+    createUser: (parent, args, context, info) => {
+      const { email } = args.data;
+      const emailTaken = users.some(user => user.email === email);
+      if (emailTaken) {
+        throw new Error(`Email ${email} is already taken.`);
+      }
+
+      const user = {
+        ...args.data,
+        id: uuid()
+      };
+
+      users.push(user);
+
+      return user;
+    },
+    createPost: (parent, args, context, info) => {
+      const { author } = args.data;
+      const userExist = users.some(user => user.id === author);
+
+      if (!userExist) {
+        throw new Error(`User ${author} not found.`);
+      }
+
+      const post = {
+        ...args.data,
+        id: uuid()
+      };
+
+      posts.push(post);
+
+      return post;
+    },
+    createComment: (parent, args, context, info) => {
+      const { author, post } = args.data;
+      const userExist = users.some(user => user.id === author);
+      if (!userExist) {
+        throw new Error(`User ${author} not found.`);
+      }
+      const existingPost = posts.find(p => p.id === post);
+      if (!existingPost) {
+        throw new Error(`Post ${post} not found.`);
+      }
+      if (!existingPost.published) {
+        throw new Error(`Post ${post} is not yet published.`);
+      }
+
+      const comment = {
+        ...args.data,
+        id: uuid()
+      };
+
+      comments.push(comment);
+
+      return comment;
     }
   },
   Comment: {
