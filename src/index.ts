@@ -4,7 +4,7 @@ import uuid from 'uuid/v4';
 // Scalar Types - String, Boolean, Int, Float, ID
 
 // Demo user data
-const users = [
+let users = [
   {
     id: '1',
     name: 'Shawnkoon',
@@ -24,7 +24,7 @@ const users = [
   }
 ];
 
-const posts = [
+let posts = [
   {
     id: '1',
     title: 'GraphQL 101',
@@ -48,7 +48,7 @@ const posts = [
   }
 ];
 
-const comments = [
+let comments = [
   { id: '101', text: 'Wow, this is an awesome post!', author: '2', post: '1' },
   { id: '102', text: 'Can I get more information about this?', author: '1', post: '3' },
   { id: '103', text: 'I like the idea', author: '3', post: '2' },
@@ -67,8 +67,11 @@ const typeDefs = `
 
   type Mutation {
     createUser(data: CreateUserInput!): User!
+    deleteUser(id: ID!): User!
     createPost(data: CreatePostInput!): Post!
+    deletePost(id: ID!): Post!
     createComment(data: CreateCommentInput!): Comment!
+    deleteComment(id: ID!): Comment!
   }
 
   input CreateUserInput {
@@ -164,6 +167,31 @@ const resolvers = {
 
       return user;
     },
+    deleteUser: (parent, args, context, info) => {
+      const { id } = args;
+      const userIndex = users.findIndex(user => user.id === id);
+
+      if (userIndex < 0) {
+        throw new Error(`User ${id} not found.`);
+      }
+
+      const deletedUser = users.splice(userIndex, 1)[0];
+
+      posts = posts.filter(post => {
+        const match = post.author === id;
+
+        if (match) {
+          // comments on posts by this user.
+          comments = comments.filter(comment => comment.post !== post.id);
+        }
+
+        return !match;
+      });
+      // comments on other posts.
+      comments = comments.filter(comment => comment.author !== id);
+
+      return deletedUser;
+    },
     createPost: (parent, args, context, info) => {
       const { author } = args.data;
       const userExist = users.some(user => user.id === author);
@@ -180,6 +208,19 @@ const resolvers = {
       posts.push(post);
 
       return post;
+    },
+    deletePost: (parent, args, context, info) => {
+      const { id } = args;
+      const postIndex = posts.findIndex(post => post.id === id);
+      if (postIndex < 0) {
+        throw new Error(`Post ${id} not found.`);
+      }
+
+      const deletedPost = posts.splice(postIndex, 1)[0];
+
+      comments = comments.filter(comment => comment.post !== id);
+
+      return deletedPost;
     },
     createComment: (parent, args, context, info) => {
       const { author, post } = args.data;
@@ -203,6 +244,18 @@ const resolvers = {
       comments.push(comment);
 
       return comment;
+    },
+    deleteComment: (parent, args, context, info) => {
+      const { id } = args;
+      const commentIndex = comments.findIndex(comment => comment.id === id);
+
+      if (commentIndex < 0) {
+        throw new Error(`Comment ${id} not found.`);
+      }
+
+      const deletedComment = comments.splice(commentIndex, 1)[0];
+
+      return deletedComment;
     }
   },
   Comment: {
@@ -233,6 +286,8 @@ const resolvers = {
 
 const server = new GraphQLServer({ typeDefs, resolvers });
 
-server.start({ port: 8080 }, () => {
-  console.log('\nThe server is up and running at http://localhost:8080 ! 🚀\n');
+const PORT = 8000;
+
+server.start({ port: PORT }, () => {
+  console.log(`\nThe server is up and running at http://localhost:${PORT} ! 🚀\n`);
 });
