@@ -1,2 +1,7 @@
 # graphql-playground
-GraphQL playground using JavaScript.
+
+| Master                                                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Build Status](https://travis-ci.com/shawnkoon/graphql-playground.svg?branch=master)](https://travis-ci.com/shawnkoon/graphql-playground) |
+
+Production ready GraphQL Server using TypeScript.
