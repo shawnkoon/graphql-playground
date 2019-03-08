@@ -4,8 +4,8 @@
   "description": "GraphQL playground using JavaScript.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc --build tsconfig.json",
-    "start": "nodemon --watch 'src/**/**.ts' --exec 'ts-node' src/index.ts",
+    "build": "tsc --build tsconfig.json && cp ./src/schema.graphql ./dist",
+    "start": "nodemon --ext 'ts, graphql' --exec 'ts-node' src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,7 +20,8 @@
   },
   "homepage": "https://github.com/shawnkoon/graphql-playground#readme",
   "dependencies": {
-    "graphql-yoga": "^1.17.4"
+    "graphql-yoga": "^1.17.4",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "^11.10.5",
