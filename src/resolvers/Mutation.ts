@@ -45,6 +45,36 @@ export const Mutation = {
 
     return deletedUser;
   },
+  updateUser: (parent, args, context, info) => {
+    const { users } = context.db;
+    const { id, data } = args;
+
+    const oldUser = users.find(user => user.id === id);
+
+    if (!oldUser) {
+      throw new Error(`User ${id} not found.`);
+    }
+
+    if (typeof data.email === 'string') {
+      const emailTaken = users.some(user => user.email === data.email);
+
+      if (emailTaken) {
+        throw new Error(`Email ${data.email} already in use.`);
+      }
+
+      oldUser.email = data.email;
+    }
+
+    if (typeof data.name === 'string') {
+      oldUser.name = data.name;
+    }
+
+    if (typeof data.age !== 'undefined') {
+      oldUser.age = data.age;
+    }
+
+    return oldUser;
+  },
   createPost: (parent, args, context, info) => {
     const { author } = args.data;
     const { posts, users } = context.db;
@@ -76,6 +106,30 @@ export const Mutation = {
     comments = comments.filter(comment => comment.post !== id);
 
     return deletedPost;
+  },
+  updatePost: (parent, args, context, info) => {
+    const { id, data } = args;
+    const { posts } = context.db;
+
+    const oldPost = posts.find(post => post.id === id);
+
+    if (!oldPost) {
+      throw new Error(`Post ${id} not found.`);
+    }
+
+    if (typeof data.title === 'string') {
+      oldPost.title = data.title;
+    }
+
+    if (typeof data.body === 'string') {
+      oldPost.body = data.body;
+    }
+
+    if (typeof data.published !== 'boolean') {
+      oldPost.published = data.published;
+    }
+
+    return oldPost;
   },
   createComment: (parent, args, context, info) => {
     const { author, post } = args.data;
@@ -113,5 +167,21 @@ export const Mutation = {
     const deletedComment = comments.splice(commentIndex, 1)[0];
 
     return deletedComment;
+  },
+  updateComment: (parent, args, context, info) => {
+    const { id, data } = args;
+    const { comments } = context.db;
+
+    const oldComment = comments.find(comment => comment.id === id);
+
+    if (!oldComment) {
+      throw new Error(`Comment ${id} not found.`);
+    }
+
+    if (typeof data.text === 'string') {
+      oldComment.text = data.text;
+    }
+
+    return oldComment;
   }
 };
