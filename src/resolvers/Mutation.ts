@@ -77,7 +77,8 @@ export const Mutation = {
   },
   createPost: (parent, args, context, info) => {
     const { author } = args.data;
-    const { posts, users } = context.db;
+    const { db, pubSub } = context;
+    const { posts, users } = db;
     const userExist = users.some(user => user.id === author);
 
     if (!userExist) {
@@ -90,6 +91,10 @@ export const Mutation = {
     };
 
     posts.push(post);
+
+    if (post.published) {
+      pubSub.publish('post', { post });
+    }
 
     return post;
   },
@@ -133,8 +138,11 @@ export const Mutation = {
   },
   createComment: (parent, args, context, info) => {
     const { author, post } = args.data;
-    const { comments, posts, users } = context.db;
+    const { db, pubSub } = context;
+    const { comments, posts, users } = db;
+
     const userExist = users.some(user => user.id === author);
+
     if (!userExist) {
       throw new Error(`User ${author} not found.`);
     }
@@ -152,6 +160,7 @@ export const Mutation = {
     };
 
     comments.push(comment);
+    pubSub.publish(`comment: ${post}`, { comment });
 
     return comment;
   },
