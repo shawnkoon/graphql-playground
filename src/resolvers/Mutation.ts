@@ -12,7 +12,7 @@ export const Mutation = {
 
     const user = {
       ...args.data,
-      id: uuid()
+      id: uuid(),
     };
 
     users.push(user);
@@ -86,7 +86,7 @@ export const Mutation = {
 
     const post = {
       ...args.data,
-      id: uuid()
+      id: uuid(),
     };
 
     posts.push(post);
@@ -148,7 +148,7 @@ export const Mutation = {
 
     const comment = {
       ...args.data,
-      id: uuid()
+      id: uuid(),
     };
 
     comments.push(comment);
@@ -183,5 +183,5 @@ export const Mutation = {
     }
 
     return oldComment;
-  }
+  },
 };

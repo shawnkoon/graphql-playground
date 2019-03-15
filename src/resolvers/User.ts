@@ -6,5 +6,5 @@ export const User = {
   comments: (parent, args, context, info) => {
     const { comments } = context.db;
     return comments.filter(comment => comment.author === parent.id);
-  }
+  },
 };

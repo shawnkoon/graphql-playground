@@ -6,5 +6,5 @@ export const Comment = {
   post: (parent, args, context, info) => {
     const { posts } = context.db;
     return posts.find(post => post.id === parent.post);
-  }
+  },
 };
