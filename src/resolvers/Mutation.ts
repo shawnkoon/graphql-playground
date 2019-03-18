@@ -93,14 +93,20 @@ export const Mutation = {
     posts.push(post);
 
     if (post.published) {
-      pubSub.publish('post', { post });
+      pubSub.publish('post', {
+        post: {
+          mutation: 'CREATED',
+          data: post,
+        },
+      });
     }
 
     return post;
   },
   deletePost: (parent, args, context, info) => {
     const { id } = args;
-    let { comments, posts } = context.db;
+    const { db, pubSub } = context;
+    let { comments, posts } = db;
     const postIndex = posts.findIndex(post => post.id === id);
     if (postIndex < 0) {
       throw new Error(`Post ${id} not found.`);
@@ -110,31 +116,68 @@ export const Mutation = {
 
     comments = comments.filter(comment => comment.post !== id);
 
+    if (deletedPost.pubished) {
+      pubSub.publish('post', {
+        post: {
+          mutation: 'DELETED',
+          data: deletedPost,
+        },
+      });
+    }
+
     return deletedPost;
   },
   updatePost: (parent, args, context, info) => {
     const { id, data } = args;
-    const { posts } = context.db;
+    const { db, pubSub } = context;
+    const { posts } = db;
 
-    const oldPost = posts.find(post => post.id === id);
+    const post = posts.find(post => post.id === id);
+    const originalPost = { ...post };
 
-    if (!oldPost) {
+    if (!post) {
       throw new Error(`Post ${id} not found.`);
     }
 
     if (typeof data.title === 'string') {
-      oldPost.title = data.title;
+      post.title = data.title;
     }
 
     if (typeof data.body === 'string') {
-      oldPost.body = data.body;
+      post.body = data.body;
     }
 
     if (typeof data.published !== 'boolean') {
-      oldPost.published = data.published;
+      post.published = data.published;
+
+      if (originalPost.published && !post.published) {
+        // deleted.
+        pubSub.publish('post', {
+          post: {
+            mutation: 'DELETED',
+            data: originalPost,
+          },
+        });
+      } else if (!originalPost.published && post.published) {
+        // created.
+        pubSub.publish('post', {
+          post: {
+            mutation: 'CREATED',
+            data: post,
+          },
+        });
+      }
+    } else if (post.publihsed) {
+      // updated.
+      pubSub.publish('post', {
+        post: {
+          mutation: 'UPDATED',
+          data: post,
+        },
+      });
     }
 
-    return oldPost;
+    return post;
   },
   createComment: (parent, args, context, info) => {
     const { author, post } = args.data;
