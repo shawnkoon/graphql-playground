@@ -30,5 +30,5 @@ export const Query = {
   post: (parent, args, context, info) => {
     const { posts } = context.db;
     return posts[0];
-  }
+  },
 };
